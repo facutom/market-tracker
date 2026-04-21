@@ -105,7 +105,7 @@ header[data-testid="stHeader"]  { display: none; }
 #  DATA
 # ─────────────────────────────────────────────────────────────────────────────
 SHEET_KEY = "1-ni2_Fn_-IU9Pka4EJlZH8rpAeLsKMGheJzl3CzLsqU"
-WORKSHEET  = "Proyección_Maestra"
+WORKSHEET  = "Proyeccion_Maestra"
 
 @st.cache_data(ttl=300, show_spinner=False)
 def load_data():
@@ -341,7 +341,7 @@ def render_sidebar():
         st.markdown("---")
         st.markdown("""
         <div style='font-size:.7rem;color:#787b86;line-height:2'>
-          <b style='color:#d1d4dc'>Hoja:</b> Proyección_Maestra<br>
+          <b style='color:#d1d4dc'>Hoja:</b> Proyeccion_Maestra<br>
           <b style='color:#d1d4dc'>Columnas:</b><br>
           &nbsp;A — Fecha<br>
           &nbsp;B — Precio Real<br>
