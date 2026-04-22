@@ -149,31 +149,40 @@ if not df.empty:
     one_year_target = df[df["Fecha"].dt.date >= target_date].iloc[0]["Precio Sintético"] if not df[df["Fecha"].dt.date >= target_date].empty else 0
 
     # HEADER Y CARDS
-    st.markdown(f"""
-    <div class="header-centered">
-        <div class="main-title">Nasdaq Price Projection</div>
-        <div class="date-sub">{datetime.now().strftime('%A %d %B %Y')}</div>
-        <div class="status-tag" style="color: {s_color};"><span class="{dot_cls}"></span> MARKET {status_txt}</div>
-        <div class="author-box"><img src="{AVATAR_URL}" class="avatar-img"><div class="author-text">Created by <a href="https://linktr.ee/facutom" target="_blank" style="color:#2962ff; text-decoration:none;">Facutom</a></div></div>
-    </div>
-    <div class="cards-container">
-        <div class="card-item">
-            <div class="card-label">Current Price</div>
-            <div class="card-value-green">${val_real:,.2f}</div>
-            <div style="color:{'#00ff41' if delta_abs >=0 else '#f23645'}; font-size:0.9rem; font-weight:700;">{'▲' if delta_abs >=0 else '▼'} ${abs(delta_abs):,.2f} ({delta_pct:+.2f}%)</div>
-        </div>
-        <div class="card-item">
-            <div class="card-label">Estimated Price in 1 Year</div>
-            <div class="card-value-teal">${one_year_target:,.2f}</div>
-            <div style="color:#787b86; font-size:0.8rem;">Target: {target_date.strftime('%d %b %Y')}</div>
-        </div>
-    </div>
-    <div class="indicator-row">
-        <div class="ind-item" style="color:#00d2ff !important;"><div class="dot" style="background:#00d2ff"></div> TODAY'S PROJECTION: ${val_proy:,.2f}</div>
-        <div class="ind-item"><div class="dot" style="background:#2962ff"></div> MA 50d: ${last_yesterday["SMA 50"]:,.2f}</div>
-        <div class="ind-item"><div class="dot" style="background:#f7931a"></div> MA 200d: ${last_yesterday["SMA 200"]:,.2f}</div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown("""
+        <style>
+        
+        /* 🔥 Elimina barra superior completa */
+        header {visibility: hidden !important;}
+        [data-testid="stHeader"] {display: none !important;}
+        [data-testid="stToolbar"] {display: none !important;}
+        [data-testid="stDecoration"] {display: none !important;}
+        
+        /* 🔥 Quita padding/margen del contenedor principal */
+        section.main > div {
+            padding-top: 0rem !important;
+            margin-top: 0rem !important;
+        }
+        
+        /* 🔥 Este es el que realmente jode en nuevas versiones */
+        .block-container {
+            padding-top: 0rem !important;
+            margin-top: 0rem !important;
+        }
+        
+        /* 🔥 Fondo full */
+        .stApp {
+            background-color: #0b0e11 !important;
+        }
+        
+        /* opcional: elimina cualquier espacio residual */
+        html, body, [class*="css"]  {
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        
+        </style>
+        """, unsafe_allow_html=True)
 
     # GRÁFICO
     fig = go.Figure()
