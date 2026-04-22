@@ -25,15 +25,29 @@ st.set_page_config(
 AVATAR_URL = "https://ugc.production.linktr.ee/2fb027da-4522-4b25-8855-39f77182ce8b_mQO6eyvY-400x400.png?io=true&size=avatar-v3_0"
 
 # ─────────────────────────────────────────────────────────────────────────────
-#  CSS MOBILE FRIENDLY (DISEÑO ORIGINAL RESTAURADO)
+#  CSS MOBILE FRIENDLY (CON ELIMINACIÓN DE ESPACIO SUPERIOR)
 # ─────────────────────────────────────────────────────────────────────────────
 st.markdown(f"""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
 
-.stApp, [data-testid="stAppViewContainer"], .main {{ background-color: #0b0e11 !important; max-width: 100vw; overflow-x: hidden; }}
+/* ELIMINAR ESPACIO SUPERIOR Y HEADER */
+header {{ visibility: hidden; height: 0px !important; }}
 [data-testid="stHeader"] {{ display: none !important; }}
-.main .block-container {{ padding: 0.5rem 0.8rem !important; margin-top: -45px !important; }}
+
+.stApp, [data-testid="stAppViewContainer"], .main {{ 
+    background-color: #0b0e11 !important; 
+    max-width: 100vw; 
+    overflow-x: hidden; 
+}}
+
+.main .block-container {{ 
+    padding-top: 1rem !important; 
+    padding-bottom: 0rem !important; 
+    padding-left: 0.8rem !important;
+    padding-right: 0.8rem !important;
+    margin-top: 0px !important; 
+}}
 
 /* RESPONSIVE ENGINE */
 @media (max-width: 768px) {{
@@ -86,9 +100,9 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────────────────────────────────────
-#  DATA LOGIC (OPTIMIZADA PARA G1)
+#  DATA LOGIC (ACTUALIZADO PARA PRIORIZAR G1)
 # ─────────────────────────────────────────────────────────────────────────────
-@st.cache_data(ttl=5) # CACHE DE 5 SEGUNDOS PARA ACTUALIZACIÓN CASI REAL
+@st.cache_data(ttl=2) # TTL muy bajo para asegurar que G1 se lea casi en vivo
 def load_data():
     try:
         info = dict(st.secrets["connections"]["gsheets"])
@@ -98,7 +112,7 @@ def load_data():
         sh = gc.open_by_key("1-ni2_Fn_-IU9Pka4EJlZH8rpAeLsKMGheJzl3CzLsqU")
         ws = sh.worksheet("Proyeccion_Maestra")
         
-        # LEER PRECIO EN VIVO DESDE G1
+        # LEER PRECIO EN VIVO DESDE G1 (Prioridad absoluta)
         live_val = ws.acell('G1').value
         live_price = float(live_val.replace(',', '.')) if live_val else None
 
@@ -110,7 +124,9 @@ def load_data():
                 df[col] = pd.to_numeric(df[col].astype(str).str.replace(',', '.').str.replace(r'[^0-9.-]', '', regex=True), errors="coerce")
         df["Fecha"] = pd.to_datetime(df["Fecha"], dayfirst=True, errors="coerce")
         return df.dropna(subset=["Fecha"]).sort_values("Fecha").reset_index(drop=True), live_price
-    except: return pd.DataFrame(), None
+    except Exception as e: 
+        st.error(f"Error cargando datos: {e}")
+        return pd.DataFrame(), None
 
 def get_market_status():
     ny_tz = pytz.timezone('America/New_York')
@@ -136,12 +152,13 @@ df, live_price = load_data()
 if not df.empty:
     status_txt, dot_cls, s_color, today_date = get_market_status()
     
-    # Filtro: Precio Real termina ayer para no tapar la proyección de hoy
+    # Filtro: Historial real hasta ayer
     df_real_history = df[(df["Precio Real"] > 0) & (df["Fecha"].dt.date < today_date)]
     last_yesterday = df_real_history.iloc[-1]
     
-    # PRECIO ACTUAL (Dinámico de G1)
-    val_real = live_price if (status_txt == "LIVE" and live_price) else last_yesterday["Precio Real"]
+    # Lógica de actualización del Current Price:
+    # Usamos live_price (G1) si está disponible, sino el último cierre.
+    val_real = live_price if live_price is not None else last_yesterday["Precio Real"]
     delta_abs = val_real - last_yesterday["Precio Real"]
     delta_pct = (delta_abs / last_yesterday["Precio Real"] * 100)
 
@@ -186,7 +203,16 @@ if not df.empty:
     fig.add_trace(go.Scatter(x=df["Fecha"], y=df["SMA 50"], name="MA50d", line=dict(color="#2962ff", width=1.5)))
     fig.add_trace(go.Scatter(x=df["Fecha"], y=df["Precio Sintético"], name="Projection", line=dict(color="#26a69a", width=2, dash="dot")))
     fig.add_trace(go.Scatter(x=df_real_history["Fecha"], y=df_real_history["Precio Real"], name="Price", line=dict(color="#00ff41", width=3)))
-    fig.update_layout(template="plotly_dark", paper_bgcolor="#0b0e11", plot_bgcolor="#0b0e11", height=500, margin=dict(l=0, r=0, t=5, b=0), yaxis=dict(side="right", type="log"), legend=dict(orientation="h", yanchor="bottom", y=0.01, xanchor="right", x=0.99, bgcolor="rgba(11, 14, 17, 0.8)"))
+    
+    fig.update_layout(
+        template="plotly_dark", 
+        paper_bgcolor="#0b0e11", 
+        plot_bgcolor="#0b0e11", 
+        height=500, 
+        margin=dict(l=0, r=0, t=5, b=0), 
+        yaxis=dict(side="right", type="log"), 
+        legend=dict(orientation="h", yanchor="bottom", y=0.01, xanchor="right", x=0.99, bgcolor="rgba(11, 14, 17, 0.8)")
+    )
     st.plotly_chart(fig, use_container_width=True, config={'displaylogo': False})
 
     # NEWS & METHODOLOGY
