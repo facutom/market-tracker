@@ -1,6 +1,8 @@
 # 📈 Nasdaq Price Projection Dashboard
-![Nasdaq Dashboard Screenshot] (Nasdaq-price-projection.png)
 
+<p align="center">
+  <img src="Nasdaq-price-projection.png" width="800" alt="Nasdaq Price Projection Dashboard">
+</p>
 
 ![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=Streamlit&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
