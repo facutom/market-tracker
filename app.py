@@ -3,9 +3,10 @@ import pandas as pd
 import plotly.graph_objects as go
 import gspread
 from google.oauth2.service_account import Credentials
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 import numpy as np
 import feedparser
+import pytz # Para el horario de New York
 
 # ─────────────────────────────────────────────────────────────────────────────
 #  CONFIGURACIÓN DE PÁGINA
@@ -39,6 +40,11 @@ st.markdown(f"""
     padding: 0.5rem 1rem !important;
     margin-top: -40px !important;
 }}
+
+/* MARKET STATUS STYLES */
+.status-tag {{ display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 700; margin-top: 5px; text-transform: uppercase; }}
+.dot-live {{ height: 8px; width: 8px; background-color: #00ff41; border-radius: 50%; display: inline-block; box-shadow: 0 0 8px #00ff41; }}
+.dot-closed {{ height: 8px; width: 8px; background-color: #f23645; border-radius: 50%; display: inline-block; }}
 
 /* RESPONSIVE ENGINE */
 @media (max-width: 768px) {{
@@ -81,7 +87,7 @@ st.markdown(f"""
 .ind-item {{ display: flex; align-items: center; gap: 8px; color: #ffffff !important; }}
 .dot {{ width: 8px; height: 8px; border-radius: 50%; }}
 
-/* SECTIONS */
+/* SECCIONES */
 .section-container {{ background: #131722 !important; border-top: 1px solid #2a2e39 !important; padding: 40px 10%; }}
 .section-title {{ color: #ffffff !important; font-size: 1.3rem; font-weight: 700; margin-bottom: 20px; border-left: 4px solid #2962ff; padding-left: 15px; }}
 .news-item {{ border-bottom: 1px solid #1e222d !important; padding-bottom: 15px; margin-bottom: 15px; }}
@@ -90,6 +96,22 @@ st.markdown(f"""
 .disclaimer {{ text-align: center; font-size: 0.7rem; color: #ffffff !important; padding: 25px; border-top: 1px solid #1e222d !important; opacity: 0.7; }}
 </style>
 """, unsafe_allow_html=True)
+
+# ─────────────────────────────────────────────────────────────────────────────
+#  HELPERS
+# ─────────────────────────────────────────────────────────────────────────────
+def get_market_status():
+    """Calcula si el Nasdaq (New York) está abierto o cerrado."""
+    ny_tz = pytz.timezone('America/New_York')
+    now = datetime.now(ny_tz)
+    # Lunes=0, Viernes=4. Sábado=5, Domingo=6.
+    is_weekday = now.weekday() < 5
+    market_open = time(9, 30)
+    market_close = time(16, 0)
+    
+    if is_weekday and (market_open <= now.time() <= market_close):
+        return "LIVE", "dot-live", "#00ff41"
+    return "CLOSED", "dot-closed", "#787b86"
 
 # ─────────────────────────────────────────────────────────────────────────────
 #  DATA LOGIC
@@ -119,7 +141,9 @@ def load_data():
 def fetch_nasdaq_news():
     try:
         feed = feedparser.parse("https://news.google.com/rss/search?q=nasdaq+stock+market&hl=en-US&gl=US&ceid=US:en")
-        return [{"title": e.title, "link": e.link, "date": e.published} for e in feed.entries[:3]]
+        # ORDENAR: de más nuevas a más viejas usando published_parsed
+        entries = sorted(feed.entries, key=lambda x: x.published_parsed, reverse=True)
+        return [{"title": e.title, "link": e.link, "date": e.published} for e in entries[:3]]
     except: return []
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -139,6 +163,9 @@ if not df.empty:
     delta_abs = val_real - prev_val
     delta_pct = (delta_abs / prev_val * 100)
 
+    # Market Status Logic
+    status_text, dot_class, status_color = get_market_status()
+
     # Prediction 1 Year
     target_date = val_date + pd.Timedelta(days=365)
     df_future = df[df["Fecha"] >= target_date]
@@ -149,6 +176,9 @@ if not df.empty:
     <div class="header-centered">
         <div class="main-title">Nasdaq Price Projection</div>
         <div class="date-sub">{val_date.strftime('%A %d %B %Y')}</div>
+        <div class="status-tag" style="color: {status_color};">
+            <span class="{dot_class}"></span> MARKET {status_text}
+        </div>
         <div class="author-box">
             <img src="{AVATAR_URL}" class="avatar-img">
             <div class="author-text">Created by <a href="https://linktr.ee/facutom" target="_blank" style="color:#2962ff; text-decoration:none;">Facutom</a></div>

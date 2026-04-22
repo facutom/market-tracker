@@ -1,0 +1,39 @@
+# 📈 Nasdaq Price Projection Dashboard
+
+![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=Streamlit&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![Google Sheets](https://img.shields.io/badge/Google%20Sheets-34A853?style=for-the-badge&logo=google-sheets&logoColor=white)
+
+A professional financial dashboard built with **Streamlit** and **Plotly** to track and project Nasdaq market trends. This tool uses a proprietary **Synthetic Price Model** to estimate future price actions based on historical cycles and technical indicators.
+
+## 🚀 Live Demo
+[https://facutom-nasdaq.streamlit.app/]
+
+## ✨ Features
+- **Real-time Price Tracking:** View current Nasdaq prices with daily percentage variations.
+- **Proprietary Projection Model:** Visualize a "Synthetic Price" path based on Fibonacci extensions and market cycles.
+- **1-Year Prediction:** Automated card showing the estimated target price exactly 365 days ahead.
+- **Technical Indicators:** Interactive SMA 50 and SMA 200 lines for trend analysis.
+- **Market Status:** Live indicator (LIVE/CLOSED) synchronized with New York Stock Exchange (NYSE) hours.
+- **Automated News:** Fetches the latest Nasdaq-related news headlines via Google News RSS.
+- **Mobile Friendly:** Fully responsive design optimized for both Desktop and Mobile devices.
+
+## 🛠️ Tech Stack
+- **Frontend:** Streamlit
+- **Data Visualization:** Plotly (Interactive Charts)
+- **Database:** Google Sheets API (via `gspread`)
+- **Backend Logic:** Python (Pandas, Numpy, Feedparser)
+
+## 📦 Installation & Setup
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/facutom/market-tracker.git
+   cd market-tracker
+
+📖 Methodology
+This projection is based on a proprietary Synthetic Price Model that combines historical cycle analysis and technical indicators. We use 200-day and 50-day SMAs for macro trends and Fibonacci-based algorithms for price pathways. This is a dynamic model that updates daily to reflect real-time market participants' behavior.
+
+👤 Author
+Facutom
+Linktree: linktr.ee/facutom
