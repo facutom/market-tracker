@@ -187,7 +187,7 @@ if not df.empty:
     # HEADER Y CARDS
     st.markdown(f"""
     <div class="header-centered">
-        <div class="main-title">Nasdaq Price Projection (QQQ)</div>
+        <div class="main-title">Nasdaq Price Projection $QQQ</div>
         <div class="date-sub">{datetime.now().strftime('%A %d %B %Y')}</div>
         <div class="status-tag" style="color: {s_color};"><span class="{dot_cls}"></span> MARKET {status_txt}</div>
         <div class="author-box"><img src="{AVATAR_URL}" class="avatar-img"><div class="author-text">Created by <a href="https://linktr.ee/facutom" target="_blank" style="color:#2962ff; text-decoration:none;">Facutom</a></div></div>
