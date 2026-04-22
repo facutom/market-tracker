@@ -167,7 +167,27 @@ def fetch_news():
 # ─────────────────────────────────────────────────────────────────────────────
 #  UI RENDERING
 # ─────────────────────────────────────────────────────────────────────────────
-df, live_price = load_data()
+df, _ = load_data()
+
+# 🔥 fetch directo SIN cache (clave)
+def get_live_price():
+    try:
+        info = dict(st.secrets["connections"]["gsheets"])
+        info["private_key"] = info["private_key"].replace("\\n", "\n")
+        creds = Credentials.from_service_account_info(info, scopes=[
+            "https://spreadsheets.google.com/feeds",
+            "https://www.googleapis.com/auth/drive"
+        ])
+        gc = gspread.authorize(creds)
+        sh = gc.open_by_key("1-ni2_Fn_-IU9Pka4EJlZH8rpAeLsKMGheJzl3CzLsqU")
+        ws = sh.worksheet("Proyeccion_Maestra")
+        
+        val = ws.acell('G1').value
+        return float(val.replace(',', '.')) if val else None
+    except:
+        return None
+
+live_price = get_live_price()
 
 if not df.empty:
     status_txt, dot_cls, s_color, today_date = get_market_status()
