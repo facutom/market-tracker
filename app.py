@@ -20,12 +20,18 @@ st.set_page_config(
 AVATAR_URL = "https://ugc.production.linktr.ee/2fb027da-4522-4b25-8855-39f77182ce8b_mQO6eyvY-400x400.png?io=true&size=avatar-v3_0"
 
 # ─────────────────────────────────────────────────────────────────────────────
-#  CSS MOBILE FRIENDLY & DASHBOARD PRO
+#  CSS REFORZADO (FORZAR MODO OSCURO TOTAL)
 # ─────────────────────────────────────────────────────────────────────────────
 st.markdown(f"""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
 
+/* FORZAR FONDO NEGRO EN TODAS LAS CAPAS DE STREAMLIT */
+.stApp, [data-testid="stAppViewContainer"], [data-testid="stHeader"], .main {{
+    background-color: #0b0e11 !important;
+}}
+
+/* ELIMINAR CABECERA Y ESPACIOS */
 [data-testid="stHeader"], .stAppHeader {{ display: none !important; }}
 
 .main .block-container {{ 
@@ -34,62 +40,56 @@ st.markdown(f"""
     margin-top: -50px !important; 
 }}
 
-footer {{ display: none !important; }}
-
-html, body {{ background-color: #0b0e11 !important; color: #d1d4dc !important; font-family: 'Inter', sans-serif !important; }}
-
-/* RESPONSIVE */
-@media (max-width: 768px) {{
-    .main-title {{ font-size: 2.2rem !important; }}
-    .cards-container {{ flex-direction: column !important; align-items: center !important; }}
-    .card-item {{ width: 100% !important; margin-bottom: 10px !important; }}
-    .indicator-row {{ flex-direction: column !important; gap: 12px !important; width: 95% !important; padding: 15px !important; }}
+/* FORZAR COLOR DE TEXTO GLOBAL */
+html, body, [class*="css"], .stMarkdown {{
+    color: #d1d4dc !important;
+    font-family: 'Inter', sans-serif !important;
 }}
 
-.header-centered {{ text-align: center; margin-bottom: 10px; }}
-.main-title {{ font-size: 3.5rem; font-weight: 800; color: #ffffff; letter-spacing: -2.5px; margin-bottom: -5px; }}
-.date-sub {{ font-size: 0.9rem; color: #787b86; text-transform: uppercase; letter-spacing: 2px; }}
+/* TÍTULO Y HEADER */
+.header-centered {{ text-align: center; margin-bottom: 10px; background-color: #0b0e11; }}
+.main-title {{ font-size: 3.5rem; font-weight: 800; color: #ffffff !important; letter-spacing: -2.5px; margin-bottom: -5px; }}
+.date-sub {{ font-size: 0.9rem; color: #787b86 !important; text-transform: uppercase; letter-spacing: 2px; }}
 
 .author-box {{ display: flex; align-items: center; justify-content: center; margin-top: 10px; margin-bottom: 20px; }}
 .avatar-img {{ width: 40px; height: 40px; margin-right: 12px; border-radius: 50%; border: 2px solid #2962ff; }}
-.author-text {{ font-size: 1.1rem; color: #ffffff; font-weight: 600; }}
+.author-text {{ font-size: 1.1rem; color: #ffffff !important; font-weight: 600; }}
 .author-text a {{ color: #2962ff !important; text-decoration: none; }}
 
 /* CARDS */
 .cards-container {{ display: flex; justify-content: center; gap: 20px; margin-bottom: 20px; }}
 .card-item {{ 
-    background: #1e222d; border: 1px solid #2a2e39; border-radius: 12px; 
+    background: #1e222d !important; 
+    border: 1px solid #2a2e39 !important; 
+    border-radius: 12px; 
     padding: 15px 30px; text-align: center; min-width: 250px; 
 }}
-.card-label {{ color: #787b86; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: 5px; }}
-.card-value-green {{ color: #00ff41; font-size: 2.2rem; font-weight: 800; line-height: 1; }}
-.card-value-teal {{ color: #26a69a; font-size: 2.2rem; font-weight: 800; line-height: 1; }}
+.card-label {{ color: #787b86 !important; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: 5px; }}
+.card-value-green {{ color: #00ff41 !important; font-size: 2.2rem; font-weight: 800; line-height: 1; }}
+.card-value-teal {{ color: #26a69a !important; font-size: 2.2rem; font-weight: 800; line-height: 1; }}
 
-/* INDICADORES MEJORADOS */
+/* INDICADORES */
 .indicator-row {{
     display: flex; justify-content: center; gap: 40px;
-    margin-bottom: 1.5rem; font-size: 0.85rem; font-weight: 700; color: #ffffff;
-    background: #1e222d; padding: 12px 35px; border-radius: 10px; border: 1px solid #2a2e39; width: fit-content; margin: 0 auto;
+    margin-bottom: 1.5rem; font-size: 0.85rem; font-weight: 700; color: #ffffff !important;
+    background: #1e222d !important; padding: 12px 35px; border-radius: 10px; border: 1px solid #2a2e39 !important; width: fit-content; margin: 0 auto;
 }}
 .ind-item {{ display: flex; align-items: center; gap: 10px; }}
-.highlight-proy {{ color: #00d2ff; text-shadow: 0 0 10px rgba(0,210,255,0.3); }} /* Mayor visibilidad para proyección */
 .dot {{ width: 10px; height: 10px; border-radius: 50%; }}
 
 /* SECCIONES INFERIORES */
-.section-container {{ background: #131722; border-top: 1px solid #2a2e39; padding: 40px 10%; margin-top: 20px; }}
-.section-title {{ color: #ffffff; font-size: 1.4rem; font-weight: 700; margin-bottom: 20px; border-left: 4px solid #2962ff; padding-left: 15px; }}
-.news-item {{ margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #1e222d; }}
-.news-date {{ color: #787b86; font-size: 0.8rem; font-weight: 600; }}
-.news-text {{ color: #d1d4dc; font-size: 1rem; margin-top: 5px; line-height: 1.5; font-weight: 600; }}
-.news-link {{ color: #2962ff; text-decoration: none; font-size: 0.85rem; }}
-.methodology-box {{ color: #b2b5be; font-size: 0.95rem; line-height: 1.7; }}
+.section-container {{ background: #131722 !important; border-top: 1px solid #2a2e39 !important; padding: 40px 10%; margin-top: 20px; }}
+.section-title {{ color: #ffffff !important; font-size: 1.4rem; font-weight: 700; margin-bottom: 20px; border-left: 4px solid #2962ff; padding-left: 15px; }}
+.news-item {{ border-bottom: 1px solid #1e222d !important; padding-bottom: 15px; margin-bottom: 15px; }}
+.news-date {{ color: #787b86 !important; font-size: 0.8rem; }}
+.news-text {{ color: #d1d4dc !important; font-size: 1rem; font-weight: 600; }}
 
-.disclaimer {{ text-align: center; font-size: 0.75rem; color: #ffffff !important; padding: 25px; line-height: 1.6; border-top: 1px solid #1e222d; }}
+.disclaimer {{ text-align: center; font-size: 0.75rem; color: #ffffff !important; padding: 25px; border-top: 1px solid #1e222d !important; }}
 </style>
 """, unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────────────────────────────────────
-#  FUNCIONES DE DATOS
+#  FUNCIONES DE DATOS (MANTENIENDO TU LÓGICA)
 # ─────────────────────────────────────────────────────────────────────────────
 SHEET_KEY = "1-ni2_Fn_-IU9Pka4EJlZH8rpAeLsKMGheJzl3CzLsqU"
 
@@ -116,10 +116,7 @@ def load_data():
 def fetch_nasdaq_news():
     try:
         feed = feedparser.parse("https://news.google.com/rss/search?q=nasdaq+stock+market&hl=en-US&gl=US&ceid=US:en")
-        articles = []
-        for entry in feed.entries[:3]:
-            articles.append({"title": entry.title, "link": entry.link, "date": entry.published})
-        return articles
+        return [{"title": e.title, "link": e.link, "date": e.published} for e in feed.entries[:3]]
     except: return []
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -133,29 +130,27 @@ if not df.empty:
     
     val_real, val_date = last_row["Precio Real"], last_row["Fecha"]
     val_sma50, val_sma200 = last_row["SMA 50"], last_row["SMA 200"]
-    val_proy = last_row["Precio Sintético"] # Proyección del día actual
+    val_proy = last_row["Precio Sintético"]
     
     prev_val = df_con_precio["Precio Real"].iloc[-2] if len(df_con_precio) > 1 else val_real
     delta_abs = val_real - prev_val
     delta_pct = (delta_abs / prev_val * 100)
 
-    # Predicción a 1 año vista
+    # Predicción 1 año
     target_date = val_date + pd.Timedelta(days=365)
     df_future = df[df["Fecha"] >= target_date]
     one_year_target = df_future.iloc[0]["Precio Sintético"] if not df_future.empty else 0
 
-    # HEADER
+    # HEADER (IMPORTANTE: Se agregaron !important a los estilos arriba para asegurar el negro)
     st.markdown(f"""<div class="header-centered">
-<div class="main-title">NASDAQ PRICE PROJECTION</div>
+<div class="main-title">Nasdaq Price Projection</div>
 <div class="date-sub">{val_date.strftime('%A %d %B %Y')}</div>
 <div class="author-box">
 <img src="{AVATAR_URL}" class="avatar-img">
 <div class="author-text">Created by <a href="https://linktr.ee/facutom" target="_blank">Facutom</a></div>
 </div>
-</div>""", unsafe_allow_html=True)
-
-    # CARDS PRINCIPALES
-    st.markdown(f"""<div class="cards-container">
+</div>
+<div class="cards-container">
 <div class="card-item">
 <div class="card-label">Current Price</div>
 <div class="card-value-green">${val_real:,.2f}</div>
@@ -168,11 +163,9 @@ if not df.empty:
 <div class="card-value-teal">${one_year_target:,.2f}</div>
 <div style="color:#787b86; font-size:0.8rem; font-weight:600; margin-top:5px;">Target: {target_date.strftime('%d %b %Y')}</div>
 </div>
-</div>""", unsafe_allow_html=True)
-
-    # BARRA DE INDICADORES (CON TODAY PROJECTION RESALTADO)
-    st.markdown(f"""<div class="indicator-row">
-<div class="ind-item highlight-proy"><div class="dot" style="background:#00d2ff"></div> TODAY PROJECTION: ${val_proy:,.2f}</div>
+</div>
+<div class="indicator-row">
+<div class="ind-item" style="color:#00d2ff !important;"><div class="dot" style="background:#00d2ff"></div> TODAY PROJECTION: ${val_proy:,.2f}</div>
 <div class="ind-item"><div class="dot" style="background:#2962ff"></div> MA 50d: ${val_sma50:,.2f}</div>
 <div class="ind-item"><div class="dot" style="background:#f7931a"></div> MA 200d: ${val_sma200:,.2f}</div>
 </div>""", unsafe_allow_html=True)
@@ -182,7 +175,7 @@ if not df.empty:
     fig.add_trace(go.Scatter(x=df["Fecha"], y=df["SMA 200"], name="MA200d", line=dict(color="#f7931a", width=1.5)))
     fig.add_trace(go.Scatter(x=df["Fecha"], y=df["SMA 50"], name="MA50d", line=dict(color="#2962ff", width=1.5)))
     fig.add_trace(go.Scatter(x=df["Fecha"], y=df["Precio Sintético"], name="Today Projection", line=dict(color="#26a69a", width=2, dash="dot")))
-    fig.add_trace(go.Scatter(x=df_con_precio["Fecha"], y=df_con_precio["Precio Real"], name="Price", line=dict(color="#00ff41", width=3)))
+    fig.add_trace(go.Scatter(x=df_con_precio["Fecha"], y=df_con_precio["Precio Real"], name="Price Real", line=dict(color="#00ff41", width=3)))
 
     fig.update_layout(
         template="plotly_dark", paper_bgcolor="#0b0e11", plot_bgcolor="#0b0e11",
@@ -194,7 +187,7 @@ if not df.empty:
     )
     st.plotly_chart(fig, use_container_width=True, config={'displaylogo': False})
 
-    # NOTICIAS Y METODOLOGÍA
+    # NOTICIAS
     news = fetch_nasdaq_news()
     st.markdown('<div class="section-container">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">Latest Nasdaq Insights & News</div>', unsafe_allow_html=True)
@@ -203,21 +196,17 @@ if not df.empty:
             st.markdown(f"""<div class="news-item">
 <div class="news-date">{item['date']}</div>
 <div class="news-text">{item['title']}</div>
-<a href="{item['link']}" class="news-link" target="_blank">Read full article →</a>
+<a href="{item['link']}" style="color:#2962ff; font-size:0.85rem; text-decoration:none;" target="_blank">Read full article →</a>
 </div>""", unsafe_allow_html=True)
-    else: st.write("No news available.")
-
+    
     st.markdown('<div style="margin-top: 40px;"></div>', unsafe_allow_html=True)
     st.markdown('<div class="section-title">Our Methodology</div>', unsafe_allow_html=True)
-    st.markdown(f"""<div class="methodology-box">
-This projection is based on a proprietary <b>Synthetic Price Model</b> que combina el análisis de ciclos históricos con indicadores técnicos de múltiples temporalidades. 
-Utilizamos las Medias Móviles Simples (SMA) de 200 y 50 días para identificar tendencias macro, mientras que nuestro algoritmo de proyección calcula rutas potenciales de descubrimiento de precios 
-basadas en extensiones de Fibonacci y clusters de volatilidad histórica. Este es un modelo dinámico que se actualiza diariamente para reflejar el comportamiento real del mercado.
+    st.markdown(f"""<div style="color:#b2b5be; line-height:1.7; font-size:0.95rem;">
+This projection is based on a proprietary <b>Synthetic Price Model</b> que combina análisis de ciclos históricos e indicadores técnicos. 
+Utilizamos SMAs de 200 y 50 días para tendencias macro y algoritmos basados en Fibonacci para rutas de precio.
 </div></div>""", unsafe_allow_html=True)
 
     # DISCLAIMER
     st.markdown("""<div class="disclaimer">
-<b>INVESTMENT DISCLAIMER:</b> This analysis is for informational and educational purposes only and does NOT constitute financial, investment, or trading advice. 
-Cryptocurrency and stock market trading involves significant risk. Past performance is not indicative of future results. 
-Always conduct your own due diligence before making any financial decisions.
+<b>INVESTMENT DISCLAIMER:</b> This analysis is for informational purposes only and does NOT constitute investment advice.
 </div>""", unsafe_allow_html=True)
