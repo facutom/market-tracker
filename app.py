@@ -10,7 +10,7 @@ import pytz
 from streamlit_autorefresh import st_autorefresh
 
 # 1. REFRESCO AUTOMÁTICO (Cada 30 segundos)
-st_autorefresh(interval=30000, limit=None, key="nasdaq_ultra_clean")
+st_autorefresh(interval=30000, limit=None, key="nasdaq_ultra_clean_v2")
 
 # ─────────────────────────────────────────────────────────────────────────────
 #  CONFIGURACIÓN DE PÁGINA
@@ -25,16 +25,18 @@ st.set_page_config(
 AVATAR_URL = "https://ugc.production.linktr.ee/2fb027da-4522-4b25-8855-39f77182ce8b_mQO6eyvY-400x400.png?io=true&size=avatar-v3_0"
 
 # ─────────────────────────────────────────────────────────────────────────────
-#  CSS INTEGRADO (Tus reglas de limpieza + Estilos del Dashboard)
+#  CSS INTEGRADO (LIMPIEZA TOTAL DE ESPACIOS ARRIBA Y ABAJO)
 # ─────────────────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
-/* 🔥 TUS REGLAS DE LIMPIEZA TOTAL 🔥 */
+/* 🔥 LIMPIEZA DE BARRAS Y HEADER 🔥 */
 header {visibility: hidden !important;}
 [data-testid="stHeader"] {display: none !important;}
 [data-testid="stToolbar"] {display: none !important;}
 [data-testid="stDecoration"] {display: none !important;}
+footer {visibility: hidden;}
 
+/* 🔥 ELIMINACIÓN DE ESPACIOS FANTASMA (ARRIBA Y ABAJO) 🔥 */
 section.main > div {
     padding-top: 0rem !important;
     margin-top: 0rem !important;
@@ -42,11 +44,14 @@ section.main > div {
 
 .block-container {
     padding-top: 0rem !important;
+    padding-bottom: 0rem !important; /* Quita el aire abajo del todo */
     margin-top: 0rem !important;
 }
 
 .stApp {
     background-color: #0b0e11 !important;
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
 }
 
 html, body, [class*="css"]  {
@@ -55,7 +60,7 @@ html, body, [class*="css"]  {
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   ESTILOS PROPIOS DEL DASHBOARD (DISEÑO TRADINGVIEW)
+   ESTILOS DEL DASHBOARD COMPACTADOS
    ───────────────────────────────────────────────────────────────────────────── */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
 
@@ -87,11 +92,27 @@ html, body, [class*="css"]  {
 .ind-item { display: flex; align-items: center; gap: 8px; color: #ffffff !important; }
 .dot { width: 8px; height: 8px; border-radius: 50%; }
 
-.section-container { background: #131722 !important; border-top: 1px solid #2a2e39 !important; padding: 40px 10%; margin-top: 30px; }
+/* SECCIONES INFERIORES COMPACTAS */
+.section-container { 
+    background: #131722 !important; 
+    border-top: 1px solid #2a2e39 !important; 
+    padding: 20px 10% 10px 10%; /* Compacto arriba y abajo */
+    margin-top: 10px; 
+}
+
 .section-title { color: #ffffff !important; font-size: 1.3rem; font-weight: 700; margin-bottom: 20px; border-left: 4px solid #2962ff; padding-left: 15px; }
 .news-item { border-bottom: 1px solid #1e222d !important; padding-bottom: 15px; margin-bottom: 15px; }
 .news-text { color: #d1d4dc !important; font-size: 0.95rem; font-weight: 600; line-height: 1.4; }
-.disclaimer { text-align: center; font-size: 0.7rem; color: #ffffff !important; padding: 25px; border-top: 1px solid #1e222d !important; opacity: 0.7; }
+
+.disclaimer { 
+    text-align: center; 
+    font-size: 0.7rem; 
+    color: #ffffff !important; 
+    padding: 10px 10px 15px; 
+    border-top: 1px solid #1e222d !important; 
+    opacity: 0.7; 
+    margin-bottom: 0 !important; 
+}
 
 @media (max-width: 768px) {
     .main-title { font-size: 2.2rem !important; }
@@ -103,7 +124,7 @@ html, body, [class*="css"]  {
 """, unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────────────────────────────────────
-#  DATA LOGIC
+#  LÓGICA DE DATOS
 # ─────────────────────────────────────────────────────────────────────────────
 @st.cache_data(ttl=5)
 def load_data():
@@ -115,7 +136,7 @@ def load_data():
         sh = gc.open_by_key("1-ni2_Fn_-IU9Pka4EJlZH8rpAeLsKMGheJzl3CzLsqU")
         ws = sh.worksheet("Proyeccion_Maestra")
         
-        # PRECIO EN VIVO DESDE G1
+        # PRECIO G1
         live_val = ws.acell('G1').value
         live_price = float(live_val.replace(',', '.')) if live_val else None
 
@@ -207,7 +228,7 @@ if not df.empty:
             st.markdown(f"""<div class="news-item"><div style="color:#787b86; font-size:0.8rem;">{item['date']}</div><div class="news-text">{item['title']}</div><a href="{item['link']}" style="color:#2962ff; font-size:0.85rem; text-decoration:none;" target="_blank">Read full article →</a></div>""", unsafe_allow_html=True)
     
     st.markdown("""
-        <div style="margin-top: 40px;"></div>
+        <div style="margin-top: 20px;"></div>
         <div class="section-title">Our Methodology</div>
         <div style="color:#b2b5be; line-height:1.7; font-size:0.95rem;">
             This projection is based on a proprietary <b>Synthetic Price Model</b> that combines historical cycle analysis and technical indicators. We use 200-day and 50-day SMAs for macro trends and Fibonacci-based algorithms for price pathways.
