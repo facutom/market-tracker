@@ -4,14 +4,16 @@
   <img src="Nasdaq-price-projection.png" width="800" alt="Nasdaq Price Projection Dashboard">
 </p>
 
-![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=Streamlit&logoColor=white)
-![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
-![Google Sheets](https://img.shields.io/badge/Google%20Sheets-34A853?style=for-the-badge&logo=google-sheets&logoColor=white)
+<p align="center">
+  <img src="https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=Streamlit&logoColor=white" alt="Streamlit">
+  <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python">
+  <img src="https://img.shields.io/badge/Google%20Sheets-34A853?style=for-the-badge&logo=google-sheets&logoColor=white" alt="Google Sheets">
+</p>
 
 A professional financial dashboard built with **Streamlit** and **Plotly** to track and project Nasdaq market trends. This tool uses a proprietary **Synthetic Price Model** to estimate future price actions based on historical cycles and technical indicators.
 
 ## 🚀 Live Demo
-[https://facutom-nasdaq.streamlit.app/]
+[Access the Live Dashboard here](https://facutom-nasdaq.streamlit.app/)
 
 ## ✨ Features
 - **Real-time Price Tracking:** View current Nasdaq prices with daily percentage variations.
@@ -26,7 +28,7 @@ A professional financial dashboard built with **Streamlit** and **Plotly** to tr
 - **Frontend:** Streamlit
 - **Data Visualization:** Plotly (Interactive Charts)
 - **Database:** Google Sheets API (via `gspread`)
-- **Backend Logic:** Python (Pandas, Numpy, Feedparser)
+- **Backend Logic:** Python (Pandas, Numpy, Feedparser, Pytz)
 
 ## 📦 Installation & Setup
 
@@ -34,9 +36,3 @@ A professional financial dashboard built with **Streamlit** and **Plotly** to tr
    ```bash
    git clone https://github.com/facutom/market-tracker.git
    cd market-tracker
-
-📖 Methodology
-This projection is based on a proprietary Synthetic Price Model that combines historical cycle analysis and technical indicators. We use 200-day and 50-day SMAs for macro trends and Fibonacci-based algorithms for price pathways. This is a dynamic model that updates daily to reflect real-time market participants' behavior.
-
-👤 Author
-Facutom - Linktree [linktr.ee/facutom]
