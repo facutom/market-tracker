@@ -209,8 +209,8 @@ if not df.empty:
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=df["Fecha"], y=df["SMA 200"], name="MA200d", line=dict(color="#f7931a", width=1.5)))
     fig.add_trace(go.Scatter(x=df["Fecha"], y=df["SMA 50"], name="MA50d", line=dict(color="#2962ff", width=1.5)))
-    fig.add_trace(go.Scatter(x=df["Fecha"], y=df["Precio Sintético"], name="Today's Projection", line=dict(color="#26a69a", width=2, dash="dot")))
-    fig.add_trace(go.Scatter(x=df_con_precio["Fecha"], y=df_con_precio["Precio Real"], name="Price Real", line=dict(color="#00ff41", width=3)))
+    fig.add_trace(go.Scatter(x=df["Fecha"], y=df["Precio Sintético"], name="Projection", line=dict(color="#26a69a", width=2, dash="dot")))
+    fig.add_trace(go.Scatter(x=df_con_precio["Fecha"], y=df_con_precio["Precio Real"], name="Price", line=dict(color="#00ff41", width=3)))
 
     fig.update_layout(
         template="plotly_dark", paper_bgcolor="#0b0e11", plot_bgcolor="#0b0e11",
