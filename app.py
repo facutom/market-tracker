@@ -7,10 +7,11 @@ from datetime import datetime, timedelta, time
 import numpy as np
 import feedparser
 import pytz
+import yfinance as yf # NUEVA LIBRERÍA
 from streamlit_autorefresh import st_autorefresh
 
-# 1. REFRESCO AUTOMÁTICO (Cada 30 segundos)
-st_autorefresh(interval=30000, limit=None, key="nasdaq_ultra_clean_v2")
+# 1. REFRESCO AUTOMÁTICO (Cada 30 segundos para actualizar el precio de YFinance)
+st_autorefresh(interval=30000, limit=None, key="nasdaq_yfinance_v1")
 
 # ─────────────────────────────────────────────────────────────────────────────
 #  CONFIGURACIÓN DE PÁGINA
@@ -25,18 +26,14 @@ st.set_page_config(
 AVATAR_URL = "https://ugc.production.linktr.ee/2fb027da-4522-4b25-8855-39f77182ce8b_mQO6eyvY-400x400.png?io=true&size=avatar-v3_0"
 
 # ─────────────────────────────────────────────────────────────────────────────
-#  CSS INTEGRADO (LIMPIEZA TOTAL DE ESPACIOS ARRIBA Y ABAJO)
+#  CSS INTEGRADO (LIMPIEZA TOTAL DE ESPACIOS)
 # ─────────────────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
-/* 🔥 LIMPIEZA DE BARRAS Y HEADER 🔥 */
 header {visibility: hidden !important;}
 [data-testid="stHeader"] {display: none !important;}
-[data-testid="stToolbar"] {display: none !important;}
-[data-testid="stDecoration"] {display: none !important;}
 footer {visibility: hidden;}
 
-/* 🔥 ELIMINACIÓN DE ESPACIOS FANTASMA (ARRIBA Y ABAJO) 🔥 */
 section.main > div {
     padding-top: 0rem !important;
     margin-top: 0rem !important;
@@ -44,27 +41,16 @@ section.main > div {
 
 .block-container {
     padding-top: 0rem !important;
-    padding-bottom: 0rem !important; /* Quita el aire abajo del todo */
-    margin-top: 0rem !important;
+    padding-bottom: 0rem !important;
+    margin-top: -100px !important; /* Sube todo al borde superior */
 }
 
-.stApp {
-    background-color: #0b0e11 !important;
-    margin-bottom: 0 !important;
-    padding-bottom: 0 !important;
-}
+.stApp { background-color: #0b0e11 !important; }
+html, body { margin: 0 !important; padding: 0 !important; background-color: #0b0e11 !important; }
 
-html, body, [class*="css"]  {
-    margin: 0 !important;
-    padding: 0 !important;
-}
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   ESTILOS DEL DASHBOARD COMPACTADOS
-   ───────────────────────────────────────────────────────────────────────────── */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
 
-.header-centered { text-align: center; margin-bottom: 10px; margin-top: 10px; }
+.header-centered { text-align: center; margin-bottom: 10px; }
 .main-title { font-size: 3.2rem; font-weight: 800; color: #ffffff !important; letter-spacing: -2px; }
 .date-sub { font-size: 0.85rem; color: #787b86 !important; text-transform: uppercase; }
 
@@ -83,36 +69,21 @@ html, body, [class*="css"]  {
 .author-text { font-size: 1rem; color: #ffffff !important; font-weight: 600; }
 
 .cards-container { display: flex; justify-content: center; gap: 20px; margin-bottom: 20px; width: 100%; }
-.card-item { background: #1e222d !important; border: 1px solid #2a2e39 !important; border-radius: 12px; padding: 20px 40px; text-align: center; min-width: 280px; }
+.card-item { background: #1e222d !important; border: 1px solid #2a2e39 !important; border-radius: 12px; padding: 15px 40px; text-align: center; min-width: 280px; }
 .card-label { color: #787b86 !important; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; }
-.card-value-green { color: #00ff41 !important; font-size: 2.4rem; font-weight: 800; }
-.card-value-teal { color: #26a69a !important; font-size: 2.4rem; font-weight: 800; }
+.card-value-green { color: #00ff41 !important; font-size: 2.2rem; font-weight: 800; }
+.card-value-teal { color: #26a69a !important; font-size: 2.2rem; font-weight: 800; }
 
 .indicator-row { display: flex; justify-content: center; gap: 30px; margin-bottom: 1.5rem; font-size: 0.85rem; font-weight: 700; background: #1e222d !important; padding: 12px 30px; border-radius: 10px; border: 1px solid #2a2e39 !important; width: fit-content; margin: 0 auto; }
 .ind-item { display: flex; align-items: center; gap: 8px; color: #ffffff !important; }
 .dot { width: 8px; height: 8px; border-radius: 50%; }
 
-/* SECCIONES INFERIORES COMPACTAS */
-.section-container { 
-    background: #131722 !important; 
-    border-top: 1px solid #2a2e39 !important; 
-    padding: 20px 10% 10px 10%; /* Compacto arriba y abajo */
-    margin-top: 10px; 
-}
-
+.section-container { background: #131722 !important; border-top: 1px solid #2a2e39 !important; padding: 20px 10% 10px 10%; margin-top: 10px; }
 .section-title { color: #ffffff !important; font-size: 1.3rem; font-weight: 700; margin-bottom: 20px; border-left: 4px solid #2962ff; padding-left: 15px; }
 .news-item { border-bottom: 1px solid #1e222d !important; padding-bottom: 15px; margin-bottom: 15px; }
 .news-text { color: #d1d4dc !important; font-size: 0.95rem; font-weight: 600; line-height: 1.4; }
 
-.disclaimer { 
-    text-align: center; 
-    font-size: 0.7rem; 
-    color: #ffffff !important; 
-    padding: 10px 10px 15px; 
-    border-top: 1px solid #1e222d !important; 
-    opacity: 0.7; 
-    margin-bottom: 0 !important; 
-}
+.disclaimer { text-align: center; font-size: 0.7rem; color: #ffffff !important; padding: 10px; border-top: 1px solid #1e222d !important; opacity: 0.7; }
 
 @media (max-width: 768px) {
     .main-title { font-size: 2.2rem !important; }
@@ -124,10 +95,10 @@ html, body, [class*="css"]  {
 """, unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────────────────────────────────────
-#  LÓGICA DE DATOS
+#  DATA LOGIC
 # ─────────────────────────────────────────────────────────────────────────────
-@st.cache_data(ttl=5)
-def load_data():
+@st.cache_data(ttl=60)
+def load_sheet_data():
     try:
         info = dict(st.secrets["connections"]["gsheets"])
         info["private_key"] = info["private_key"].replace("\\n", "\n")
@@ -135,19 +106,23 @@ def load_data():
         gc = gspread.authorize(creds)
         sh = gc.open_by_key("1-ni2_Fn_-IU9Pka4EJlZH8rpAeLsKMGheJzl3CzLsqU")
         ws = sh.worksheet("Proyeccion_Maestra")
-        
-        # PRECIO G1
-        live_val = ws.acell('G1').value
-        live_price = float(live_val.replace(',', '.')) if live_val else None
-
         raw = ws.get_all_values()
         df = pd.DataFrame(raw[1:], columns=raw[0])
         for col in ["Precio Real", "Precio Sintético", "SMA 50", "SMA 200"]:
             if col in df.columns:
                 df[col] = pd.to_numeric(df[col].astype(str).str.replace(',', '.').str.replace(r'[^0-9.-]', '', regex=True), errors="coerce")
         df["Fecha"] = pd.to_datetime(df["Fecha"], dayfirst=True, errors="coerce")
-        return df.dropna(subset=["Fecha"]).sort_values("Fecha").reset_index(drop=True), live_price
-    except: return pd.DataFrame(), None
+        return df.dropna(subset=["Fecha"]).sort_values("Fecha").reset_index(drop=True)
+    except: return pd.DataFrame()
+
+# 🔥 PRECIO LIVE DESDE YFINANCE (NASDAQ-100 QQQ)
+def get_yfinance_price():
+    try:
+        ticker = yf.Ticker("QQQ")
+        price = ticker.fast_info['last_price']
+        return price
+    except:
+        return None
 
 def get_market_status():
     ny_tz = pytz.timezone('America/New_York')
@@ -167,44 +142,32 @@ def fetch_news():
 # ─────────────────────────────────────────────────────────────────────────────
 #  UI RENDERING
 # ─────────────────────────────────────────────────────────────────────────────
-df, _ = load_data()
-
-# 🔥 fetch directo SIN cache (clave)
-def get_live_price():
-    try:
-        info = dict(st.secrets["connections"]["gsheets"])
-        info["private_key"] = info["private_key"].replace("\\n", "\n")
-        creds = Credentials.from_service_account_info(info, scopes=[
-            "https://spreadsheets.google.com/feeds",
-            "https://www.googleapis.com/auth/drive"
-        ])
-        gc = gspread.authorize(creds)
-        sh = gc.open_by_key("1-ni2_Fn_-IU9Pka4EJlZH8rpAeLsKMGheJzl3CzLsqU")
-        ws = sh.worksheet("Proyeccion_Maestra")
-        
-        val = ws.acell('G1').value
-        return float(val.replace(',', '.')) if val else None
-    except:
-        return None
-
-live_price = get_live_price()
+df = load_sheet_data()
+live_price = get_yfinance_price()
 
 if not df.empty:
     status_txt, dot_cls, s_color, today_date = get_market_status()
+    
+    # Filtro: Precio Real termina ayer
     df_real_history = df[(df["Precio Real"] > 0) & (df["Fecha"].dt.date < today_date)]
     last_yesterday = df_real_history.iloc[-1]
     
+    # Val Real es YFinance si existe, sino el cierre de ayer
     val_real = live_price if live_price is not None else last_yesterday["Precio Real"]
+    
+    # VARIACIÓN RESPECTO AL CIERRE DE AYER
     delta_abs = val_real - last_yesterday["Precio Real"]
     delta_pct = (delta_abs / last_yesterday["Precio Real"] * 100)
 
+    # Proyectado de hoy
     today_row = df[df["Fecha"].dt.date == today_date]
     val_proy = today_row["Precio Sintético"].values[0] if not today_row.empty else last_yesterday["Precio Sintético"]
     
+    # Predicción 1 año
     target_date = today_date + timedelta(days=365)
-    one_year_target = df[df["Fecha"].dt.date >= target_date].iloc[0]["Precio Sintético"] if not df[df["Fecha"].dt.date >= target_date].empty else 0
+    df_future = df[df["Fecha"].dt.date >= target_date]
+    one_year_target = df_future.iloc[0]["Precio Sintético"] if not df_future.empty else 0
 
-    # HEADER Y CARDS
     st.markdown(f"""
     <div class="header-centered">
         <div class="main-title">Nasdaq Price Projection $QQQ</div>
@@ -247,12 +210,11 @@ if not df.empty:
         for item in news:
             st.markdown(f"""<div class="news-item"><div style="color:#787b86; font-size:0.8rem;">{item['date']}</div><div class="news-text">{item['title']}</div><a href="{item['link']}" style="color:#2962ff; font-size:0.85rem; text-decoration:none;" target="_blank">Read full article →</a></div>""", unsafe_allow_html=True)
     
-    st.markdown("""
+    st.markdown(f"""
         <div style="margin-top: 20px;"></div>
         <div class="section-title">Our Methodology</div>
         <div style="color:#b2b5be; line-height:1.7; font-size:0.95rem;">
             This projection is based on a proprietary <b>Synthetic Price Model</b> that combines historical cycle analysis and technical indicators. We use 200-day and 50-day SMAs for macro trends and Fibonacci-based algorithms for price pathways.
         </div>
-    </div>
-    """, unsafe_allow_html=True)
+    </div>""", unsafe_allow_html=True)
     st.markdown("""<div class="disclaimer"><b>INVESTMENT DISCLAIMER:</b> This analysis is for informational purposes only and does NOT constitute investment advice.</div>""", unsafe_allow_html=True)
