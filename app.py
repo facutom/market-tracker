@@ -7,6 +7,13 @@ from datetime import datetime, timedelta, time
 import numpy as np
 import feedparser
 import pytz # Para el horario de New York
+from streamlit_autorefresh import st_autorefresh # NUEVA IMPORTACIÓN
+
+# ─────────────────────────────────────────────────────────────────────────────
+#  AUTO-REFRESCO AUTOMÁTICO (Cada 1 minuto)
+# ─────────────────────────────────────────────────────────────────────────────
+# Refresca la aplicación cada 60.000 milisegundos (1 minuto)
+st_autorefresh(interval=60000, limit=None, key="pricerefresh")
 
 # ─────────────────────────────────────────────────────────────────────────────
 #  CONFIGURACIÓN DE PÁGINA
@@ -117,7 +124,7 @@ def get_market_status():
 # ─────────────────────────────────────────────────────────────────────────────
 SHEET_KEY = "1-ni2_Fn_-IU9Pka4EJlZH8rpAeLsKMGheJzl3CzLsqU"
 
-@st.cache_data(ttl=30) # Reducimos caché a 30s para captar el precio en vivo (G1)
+@st.cache_data(ttl=10) # Reducimos caché a 10s para que fluya más rápido con G1
 def load_data():
     try:
         info = dict(st.secrets["connections"]["gsheets"])
@@ -156,7 +163,6 @@ def fetch_nasdaq_news():
 df, live_price = load_data()
 
 if not df.empty:
-    # Lógica de Horario y Fecha de hoy
     status_text, dot_class, status_color, today_date = get_market_status()
     
     # FILTRO: Para el gráfico de Precio Real, solo mostramos hasta AYER (evita superposición)
