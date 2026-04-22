@@ -1,4 +1,6 @@
 # 📈 Nasdaq Price Projection Dashboard
+![Nasdaq Dashboard Screenshot]
+
 
 ![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=Streamlit&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
@@ -35,5 +37,4 @@ A professional financial dashboard built with **Streamlit** and **Plotly** to tr
 This projection is based on a proprietary Synthetic Price Model that combines historical cycle analysis and technical indicators. We use 200-day and 50-day SMAs for macro trends and Fibonacci-based algorithms for price pathways. This is a dynamic model that updates daily to reflect real-time market participants' behavior.
 
 👤 Author
-Facutom
-Linktree: linktr.ee/facutom
+Facutom - Linktree [linktr.ee/facutom]
