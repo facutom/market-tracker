@@ -202,8 +202,7 @@ if not df.empty:
     st.markdown('<div style="margin-top: 40px;"></div>', unsafe_allow_html=True)
     st.markdown('<div class="section-title">Our Methodology</div>', unsafe_allow_html=True)
     st.markdown(f"""<div style="color:#b2b5be; line-height:1.7; font-size:0.95rem;">
-This projection is based on a proprietary <b>Synthetic Price Model</b> que combina análisis de ciclos históricos e indicadores técnicos. 
-Utilizamos SMAs de 200 y 50 días para tendencias macro y algoritmos basados en Fibonacci para rutas de precio.
+This projection is based on a proprietary <b>Synthetic Price Model</b> that combines historical cycle analysis and technical indicators. We use 200-day and 50-day SMAs for macro trends and Fibonacci-based algorithms for price pathways.
 </div></div>""", unsafe_allow_html=True)
 
     # DISCLAIMER
