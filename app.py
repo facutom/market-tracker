@@ -3,15 +3,13 @@ import pandas as pd
 import plotly.graph_objects as go
 import gspread
 from google.oauth2.service_account import Credentials
-from datetime import datetime, timedelta, time
+from datetime import datetime, timedelta, time as dt_time
 import numpy as np
 import feedparser
 import pytz
-import yfinance as yf 
-from streamlit_autorefresh import st_autorefresh
-
-# 1. REFRESCO AUTOMÁTICO (60 segundos)
-st_autorefresh(interval=60000, limit=None, key="nasdaq_ultra_clean_v3")
+import yfinance as yf
+import time
+import time
 
 # ─────────────────────────────────────────────────────────────────────────────
 #  CONFIGURACIÓN DE PÁGINA
@@ -22,6 +20,36 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="collapsed",
 )
+
+# ─────────────────────────────────────────────────────────────────────────────
+#  CONTROL DE REFRESCO SELECTIVO
+# ─────────────────────────────────────────────────────────────────────────────
+ny_tz = pytz.timezone('America/New_York')
+now_ny = datetime.now(ny_tz)
+is_weekday = now_ny.weekday() < 5
+m_open, m_close = dt_time(9, 30), dt_time(16, 0)
+market_is_open = is_weekday and (m_open <= now_ny.time() <= m_close)
+
+# Control de estado para detectar cierre de mercado
+if 'last_market_open' not in st.session_state:
+    st.session_state.last_market_open = market_is_open
+
+# Si acaba de cerrarse el mercado → forzar rerun para actualizar datos
+if st.session_state.last_market_open and not market_is_open:
+    st.session_state.last_market_open = False
+    st.rerun()
+
+# Si mercado abre → resetear flag y refrescar
+if not st.session_state.last_market_open and market_is_open:
+    st.session_state.last_market_open = True
+    st.rerun()
+
+# Si mercado abierto → refrescar cada 2 segundos (solo precio)
+if market_is_open:
+    time.sleep(2)
+    st.rerun()
+
+st.session_state.last_market_open = market_is_open
 
 AVATAR_URL = "https://ugc.production.linktr.ee/2fb027da-4522-4b25-8855-39f77182ce8b_mQO6eyvY-400x400.png?io=true&size=avatar-v3_0"
 
@@ -212,7 +240,7 @@ def get_market_status():
     ny_tz = pytz.timezone('America/New_York')
     now = datetime.now(ny_tz)
     is_weekday = now.weekday() < 5
-    m_open, m_close = time(9, 30), time(16, 0)
+    m_open, m_close = dt_time(9, 30), dt_time(16, 0)
     if is_weekday and (m_open <= now.time() <= m_close):
         return "LIVE", "dot-live", "#00ff41", now.date()
     return "CLOSED", "dot-closed", "#787b86", now.date()
@@ -240,7 +268,13 @@ live_price, yf_yesterday = get_live_price()
 
 if not df.empty:
     status_txt, dot_cls, s_color, today_date = get_market_status()
-    df_real_history = df[(df["Precio Real"] > 0) & (df["Fecha"].dt.date < today_date)]
+    
+    # Datos históricos: incluir hoy SOLO si mercado cerrado
+    if market_is_open:
+        df_real_history = df[(df["Precio Real"] > 0) & (df["Fecha"].dt.date < today_date)]
+    else:
+        df_real_history = df[(df["Precio Real"] > 0) & (df["Fecha"].dt.date <= today_date)]
+    
     last_yesterday_sheet = df_real_history.iloc[-1]
     
     val_real = live_price if live_price is not None else last_yesterday_sheet["Precio Real"]
