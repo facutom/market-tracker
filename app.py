@@ -9,7 +9,6 @@ import feedparser
 import pytz
 import yfinance as yf
 import time
-import time
 
 # ─────────────────────────────────────────────────────────────────────────────
 #  CONFIGURACIÓN DE PÁGINA
@@ -345,7 +344,7 @@ if not df.empty:
     fig.add_trace(go.Scatter(x=df["Fecha"], y=df["Precio Sintético"], name="Projection", line=dict(color="#26a69a", width=2, dash="dot")))
     fig.add_trace(go.Scatter(x=df_real_history["Fecha"], y=df_real_history["Precio Real"], name="Price", line=dict(color="#00ff41", width=3)))
     fig.update_layout(template="plotly_dark", paper_bgcolor="#0b0e11", plot_bgcolor="#0b0e11", height=500, margin=dict(l=0, r=0, t=5, b=0), yaxis=dict(side="right", type="log"), legend=dict(orientation="h", yanchor="bottom", y=0.01, xanchor="right", x=0.99, bgcolor="rgba(11, 14, 17, 0.8)"))
-    st.plotly_chart(fig, use_container_width=True, config={'displaylogo': False})
+    st.plotly_chart(fig, width='stretch', config={'displaylogo': False})
 
     # 1. DAILY MODEL AUDIT SECTION
     df_m = df_real_history.tail(90).copy()
