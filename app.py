@@ -9,6 +9,7 @@ import feedparser
 import pytz
 import yfinance as yf
 import time
+import time
 
 # ─────────────────────────────────────────────────────────────────────────────
 #  CONFIGURACIÓN DE PÁGINA
@@ -21,7 +22,7 @@ st.set_page_config(
 )
 
 # ─────────────────────────────────────────────────────────────────────────────
-#  CONTROL DE REFRESCO Y ESTADO DEL MERCADO
+#  CONTROL DE REFRESCO SELECTIVO
 # ─────────────────────────────────────────────────────────────────────────────
 ny_tz = pytz.timezone('America/New_York')
 now_ny = datetime.now(ny_tz)
@@ -29,14 +30,26 @@ is_weekday = now_ny.weekday() < 5
 m_open, m_close = dt_time(9, 30), dt_time(16, 0)
 market_is_open = is_weekday and (m_open <= now_ny.time() <= m_close)
 
-# Inicializar estado si no existe
+# Control de estado para detectar cierre de mercado
 if 'last_market_open' not in st.session_state:
     st.session_state.last_market_open = market_is_open
 
-# Lógica de rerun automático
-if st.session_state.last_market_open != market_is_open:
-    st.session_state.last_market_open = market_is_open
+# Si acaba de cerrarse el mercado → forzar rerun para actualizar datos
+if st.session_state.last_market_open and not market_is_open:
+    st.session_state.last_market_open = False
     st.rerun()
+
+# Si mercado abre → resetear flag y refrescar
+if not st.session_state.last_market_open and market_is_open:
+    st.session_state.last_market_open = True
+    st.rerun()
+
+# Si mercado abierto → refrescar cada 2 segundos (solo precio)
+if market_is_open:
+    time.sleep(2)
+    st.rerun()
+
+st.session_state.last_market_open = market_is_open
 
 AVATAR_URL = "https://ugc.production.linktr.ee/2fb027da-4522-4b25-8855-39f77182ce8b_mQO6eyvY-400x400.png?io=true&size=avatar-v3_0"
 
@@ -50,28 +63,41 @@ header {visibility: hidden !important;}
 [data-testid="stToolbar"] {display: none !important;}
 [data-testid="stDecoration"] {display: none !important;}
 footer {visibility: hidden;}
+
+/* ELIMINAR ESTILOS POR DEFECTO DE ST MARKDOWN */
 [data-testid="stMarkdownContainer"] > p { margin-bottom: 0px !important; }
 [data-testid="stMarkdownContainer"] { padding: 0px !important; }
+
 section.main > div { padding-top: 0rem !important; }
 .block-container { padding-top: 0.5rem !important; padding-bottom: 2rem !important; }
 .stApp { background-color: #0b0e11 !important; }
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+
+/* HEADER */
 .header-centered { text-align: center; margin-bottom: 20px; }
 .main-title { font-size: 3.5rem; font-weight: 800; color: #ffffff !important; letter-spacing: -2px; line-height: 1.1; }
 .date-sub { font-size: 0.95rem; color: #787b86 !important; text-transform: uppercase; margin-top: 5px; }
+
+/* STATUS */
 .status-tag { display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 700; margin-top: 8px; }
 .dot-live { height: 10px; width: 10px; background-color: #00ff41; border-radius: 50%; animation: pulse-green 2s infinite; }
 .dot-closed { height: 10px; width: 10px; background-color: #f23645; border-radius: 50%; }
+
 @keyframes pulse-green {
     0% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(0, 255, 65, 0.7); }
     70% { transform: scale(1.1); box-shadow: 0 0 0 8px rgba(0, 255, 65, 0); }
     100% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(0, 255, 65, 0); }
 }
+
+/* CARDS GENERALES */
 .cards-container { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; width: 100%; flex-wrap: wrap; }
 .card-item { background: #1e222d !important; border: 1px solid #2a2e39 !important; border-radius: 12px; padding: 20px 40px; text-align: center; min-width: 280px; }
 .card-label { color: #787b86 !important; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: 5px; }
 .card-value-green { color: #00ff41 !important; font-size: 2.5rem; font-weight: 800; line-height: 1; }
 .card-value-teal { color: #26a69a !important; font-size: 2.5rem; font-weight: 800; line-height: 1; }
+
+/* MINI CARDS (AUDIT) */
 .mini-card { background: #131722 !important; border: 1px solid #2a2e39 !important; border-radius: 8px; padding: 12px; text-align: center; flex: 1; min-width: 120px; }
 .mini-value { color: #26a69a !important; font-size: 1.6rem; font-weight: 800; }
 .mini-value.signal-buy { color: #00ff41 !important; }
@@ -79,30 +105,120 @@ section.main > div { padding-top: 0rem !important; }
 .mini-value.signal-hold { color: #787b86 !important; }
 .mini-value.signal-na { color: #787b86 !important; }
 .signal-return { font-size: 1.2rem; font-weight: 700; margin-top: 0; }
+
+/* INDICATORS */
 .indicator-row { display: flex; justify-content: center; gap: 30px; margin: 0 auto 20px auto; font-size: 0.8rem; font-weight: 700; background: #1e222d !important; padding: 12px 25px; border-radius: 10px; border: 1px solid #2a2e39 !important; width: fit-content; }
 .ind-item { display: flex; align-items: center; gap: 8px; color: #ffffff !important; }
 .dot { width: 8px; height: 8px; border-radius: 50%; }
-.tooltip-wrapper { position: relative; display: inline-flex; margin-left: 6px; cursor: help; }
-.tooltip-icon { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; background: #2962ff; color: white; border-radius: 50%; font-size: 10px; font-weight: bold; }
-.tooltip-text { visibility: hidden; position: absolute; bottom: 130%; left: 50%; transform: translateX(-50%); background: #1e222d; color: #ffffff; padding: 10px; border-radius: 8px; border: 1px solid #2a2e39; font-size: 0.75rem; width: 180px; opacity: 0; transition: 0.2s; z-index: 100; }
-.tooltip-wrapper:hover .tooltip-text { visibility: visible; opacity: 1; }
-.section-box { background: #1e222d !important; border: 1px solid #2a2e39 !important; border-radius: 12px; padding: 25px; margin-top: 20px; }
-.section-title { color: #ffffff !important; font-size: 1.3rem; font-weight: 700; margin-bottom: 20px; border-left: 4px solid #2962ff; padding-left: 15px; }
-.table-scroll { max-height: 350px; overflow-y: auto; border: 1px solid #2a2e39; border-radius: 8px; }
-.audit-table { width: 100%; border-collapse: collapse; color: #d1d4dc; }
-.audit-table th { position: sticky; top: 0; background: #2a2e39; padding: 12px; font-size: 0.7rem; }
+
+/* TOOLTIP ICONS */
+.tooltip-wrapper {
+    position: relative;
+    display: inline-flex;
+    margin-left: 6px;
+    cursor: help;
+}
+.tooltip-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    background: #2962ff;
+    color: white;
+    border-radius: 50%;
+    font-size: 10px;
+    font-weight: bold;
+    transition: background 0.2s;
+}
+.tooltip-wrapper:hover .tooltip-icon {
+    background: #1e3a8a;
+}
+.tooltip-text {
+    visibility: hidden;
+    position: absolute;
+    bottom: 130%;
+    left: 50%;
+    transform: translateX(-50%) translateY(5px);
+    background: #1e222d;
+    color: #ffffff;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid #2a2e39;
+    font-size: 0.75rem;
+    font-weight: 400;
+    white-space: nowrap;
+    opacity: 0;
+    transition: all 0.2s ease-in-out;
+    z-index: 100;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+.tooltip-wrapper:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+.tooltip-text::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #2a2e39 transparent transparent transparent;
+}
+@media (max-width: 768px) {
+    .tooltip-text {
+        white-space: normal;
+        max-width: 200px;
+        bottom: 140%;
+    }
+}
+
+/* UNIFICACIÓN DE SECCIONES */
+.section-box { 
+    background: #1e222d !important; 
+    border: 1px solid #2a2e39 !important; 
+    border-radius: 12px;
+    padding: 25px; 
+    margin-top: 20px; 
+}
+.section-title { 
+    color: #ffffff !important; 
+    font-size: 1.3rem; 
+    font-weight: 700; 
+    margin-bottom: 20px; 
+    border-left: 4px solid #2962ff; 
+    padding-left: 15px; 
+    line-height: 1;
+}
+
+/* TABLES */
+.table-scroll { max-height: 350px; overflow-y: auto; border-radius: 8px; border: 1px solid #2a2e39; background: #131722; margin-top: 10px; }
+.audit-table { width: 100%; border-collapse: collapse; color: #d1d4dc; font-size: 0.85rem; }
+.audit-table th { position: sticky; top: 0; background: #2a2e39; color: #787b86; padding: 12px; text-transform: uppercase; font-size: 0.7rem; z-index: 10; text-align: center; }
 .audit-table td { padding: 12px; border-bottom: 1px solid #2a2e39; text-align: center; }
+.audit-table tbody tr:hover { background: #1e222d; }
 .hit-high { color: #00ff41; font-weight: 700; }
+
 .author-box { display: flex; align-items: center; justify-content: center; margin: 15px 0 20px; }
 .avatar-img { width: 30px; height: 30px; margin-right: 10px; border-radius: 50%; border: 2px solid #2962ff; }
 .author-text { font-size: 0.95rem; color: #ffffff !important; font-weight: 600; }
+
+@media (max-width: 768px) {
+    .main-title { font-size: 2rem !important; }
+    .card-item { min-width: 45%; padding: 15px 20px; }
+    .card-value-green, .card-value-teal { font-size: 1.8rem !important; }
+    .indicator-row { font-size: 0.7rem; gap: 8px; padding: 10px 15px; }
+}
 </style>
 """, unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────────────────────────────────────
 #  LÓGICA DE DATOS
 # ─────────────────────────────────────────────────────────────────────────────
-@st.cache_data(ttl=300)
+@st.cache_data(ttl=60)
 def load_data():
     try:
         info = dict(st.secrets["connections"]["gsheets"])
@@ -118,9 +234,16 @@ def load_data():
                 df[col] = pd.to_numeric(df[col].astype(str).str.replace(',', '.').str.replace(r'[^0-9.-]', '', regex=True), errors="coerce")
         df["Fecha"] = pd.to_datetime(df["Fecha"], dayfirst=True, errors="coerce")
         return df.dropna(subset=["Fecha"]).sort_values("Fecha").reset_index(drop=True)
-    except Exception as e:
-        st.error(f"Error loading data: {e}")
-        return pd.DataFrame()
+    except: return pd.DataFrame()
+
+def get_market_status():
+    ny_tz = pytz.timezone('America/New_York')
+    now = datetime.now(ny_tz)
+    is_weekday = now.weekday() < 5
+    m_open, m_close = dt_time(9, 30), dt_time(16, 0)
+    if is_weekday and (m_open <= now.time() <= m_close):
+        return "LIVE", "dot-live", "#00ff41", now.date()
+    return "CLOSED", "dot-closed", "#787b86", now.date()
 
 def fetch_news():
     try:
@@ -132,11 +255,9 @@ def get_live_price():
     try:
         ticker = yf.Ticker("QQQ")
         hist = ticker.history(period="2d")
-        if not hist.empty and len(hist) >= 2:
-            return hist['Close'].iloc[-1], hist['Close'].iloc[-2]
-        elif not hist.empty:
-            return hist['Close'].iloc[-1], None
-        return None, None
+        if len(hist) >= 2:
+            return ticker.fast_info['last_price'], hist['Close'].iloc[-2]
+        return ticker.fast_info['last_price'], None
     except: return None, None
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -146,34 +267,30 @@ df = load_data()
 live_price, yf_yesterday = get_live_price()
 
 if not df.empty:
-    status_txt = "LIVE" if market_is_open else "CLOSED"
-    dot_cls = "dot-live" if market_is_open else "dot-closed"
-    s_color = "#00ff41" if market_is_open else "#787b86"
-    today_date = now_ny.date()
+    status_txt, dot_cls, s_color, today_date = get_market_status()
     
-    # Datos históricos
+    # Datos históricos: incluir hoy SOLO si mercado cerrado
     if market_is_open:
-        df_real_history = df[(df["Precio Real"] > 0) & (df["Fecha"].dt.date < today_date)].copy()
+        df_real_history = df[(df["Precio Real"] > 0) & (df["Fecha"].dt.date < today_date)]
     else:
-        df_real_history = df[(df["Precio Real"] > 0) & (df["Fecha"].dt.date <= today_date)].copy()
+        df_real_history = df[(df["Precio Real"] > 0) & (df["Fecha"].dt.date <= today_date)]
     
-    last_row_real = df_real_history.iloc[-1] if not df_real_history.empty else df.iloc[0]
-    val_real = live_price if live_price is not None else last_row_real["Precio Real"]
+    last_yesterday_sheet = df_real_history.iloc[-1]
     
-    # Cálculo de deltas
-    ref_price = yf_yesterday if yf_yesterday else last_row_real["Precio Real"]
-    delta_abs = val_real - ref_price
-    delta_pct = (delta_abs / ref_price * 100) if ref_price != 0 else 0
+    val_real = live_price if live_price is not None else last_yesterday_sheet["Precio Real"]
+    if live_price and yf_yesterday:
+        delta_abs, delta_pct = live_price - yf_yesterday, (live_price - yf_yesterday)/yf_yesterday*100
+    else:
+        delta_abs, delta_pct = val_real - last_yesterday_sheet["Precio Real"], (val_real - last_yesterday_sheet["Precio Real"])/last_yesterday_sheet["Precio Real"]*100
 
-    # Proyecciones
     today_row = df[df["Fecha"].dt.date == today_date]
-    val_proy = today_row["Precio Sintético"].values[0] if not today_row.empty else last_row_real["Precio Sintético"]
+    val_proy = today_row["Precio Sintético"].values[0] if not today_row.empty else last_yesterday_sheet["Precio Sintético"]
     
-    target_date_1y = today_date + timedelta(days=365)
-    df_future = df[df["Fecha"].dt.date >= target_date_1y]
+    target_date = today_date + timedelta(days=365)
+    df_future = df[df["Fecha"].dt.date >= target_date]
     one_year_target = df_future.iloc[0]["Precio Sintético"] if not df_future.empty else 0
 
-    # Señal del modelo (90 días)
+    # MODEL SIGNAL (90D) CALCULATION
     target_date_90d = today_date + timedelta(days=90)
     df_future_90d = df[df["Fecha"].dt.date >= target_date_90d]
     price_90d = df_future_90d.iloc[0]["Precio Sintético"] if not df_future_90d.empty else None
@@ -181,19 +298,24 @@ if not df.empty:
     if price_90d is not None and val_real > 0:
         expected_return_90d = (price_90d / val_real - 1) * 100
         if expected_return_90d > 5:
-            signal, signal_color = "BUY", "#00ff41"
+            signal = "BUY"
+            signal_color = "#00ff41"
         elif expected_return_90d < -5:
-            signal, signal_color = "SELL", "#f23645"
+            signal = "SELL"
+            signal_color = "#f23645"
         else:
-            signal, signal_color = "HOLD", "#787b86"
+            signal = "HOLD"
+            signal_color = "#787b86"
     else:
-        expected_return_90d, signal, signal_color = 0.0, "NA", "#787b86"
+        expected_return_90d = 0.0
+        signal = "NA"
+        signal_color = "#787b86"
 
     # UI HEADER
     st.markdown(f"""
     <div class="header-centered">
         <div class="main-title">Nasdaq Price Projection $QQQ</div>
-        <div class="date-sub">{now_ny.strftime('%A %d %B %Y')}</div>
+        <div class="date-sub">{datetime.now().strftime('%A %d %B %Y')}</div>
         <div class="status-tag" style="color: {s_color};"><span class="{dot_cls}"></span> MARKET {status_txt}</div>
         <div class="author-box"><img src="{AVATAR_URL}" class="avatar-img"><div class="author-text">Created by <a href="https://linktr.ee/facutom" target="_blank" style="color:#2962ff; text-decoration:none;">Facutom</a></div></div>
     </div>
@@ -206,13 +328,13 @@ if not df.empty:
         <div class="card-item">
             <div class="card-label">Estimated Price in 1 Year</div>
             <div class="card-value-teal">${one_year_target:,.2f}</div>
-            <div style="color:#787b86; font-size:0.75rem;">Target: {target_date_1y.strftime('%d %b %Y')}</div>
+            <div style="color:#787b86; font-size:0.75rem;">Target: {target_date.strftime('%d %b %Y')}</div>
         </div>
     </div>
     <div class="indicator-row">
         <div class="ind-item" style="color:#00d2ff !important;"><div class="dot" style="background:#00d2ff"></div> TODAY'S PROJECTION: ${val_proy:,.2f}</div>
-        <div class="ind-item" style="color:#2962ff !important;"><div class="dot" style="background:#2962ff"></div> MA 50d: ${last_row_real["SMA 50"]:,.2f}</div>
-        <div class="ind-item" style="color:#f7931a !important;"><div class="dot" style="background:#f7931a"></div> MA 200d: ${last_row_real["SMA 200"]:,.2f}</div>
+        <div class="ind-item" style="color:#2962ff !important;"><div class="dot" style="background:#2962ff"></div> MA 50d: ${last_yesterday_sheet["SMA 50"]:,.2f}</div>
+        <div class="ind-item" style="color:#f7931a !important;"><div class="dot" style="background:#f7931a"></div> MA 200d: ${last_yesterday_sheet["SMA 200"]:,.2f}</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -225,68 +347,90 @@ if not df.empty:
     fig.update_layout(template="plotly_dark", paper_bgcolor="#0b0e11", plot_bgcolor="#0b0e11", height=500, margin=dict(l=0, r=0, t=5, b=0), yaxis=dict(side="right", type="log"), legend=dict(orientation="h", yanchor="bottom", y=0.01, xanchor="right", x=0.99, bgcolor="rgba(11, 14, 17, 0.8)"))
     st.plotly_chart(fig, use_container_width=True, config={'displaylogo': False})
 
-    # MODEL AUDIT
+    # 1. DAILY MODEL AUDIT SECTION
     df_m = df_real_history.tail(90).copy()
-    if not df_m.empty:
-        err_p = (df_m["Precio Sintético"] - df_m["Precio Real"]) / df_m["Precio Real"]
-        mape = err_p.abs().mean() * 100
-        v_err = err_p.std() * 100
-        bias = err_p.mean() * 100
-        
-        audit_rows_df = df_m.sort_values("Fecha", ascending=False)
-        table_rows = ""
-        for _, r in audit_rows_df.iterrows():
-            hit_rate = 100 - (abs(r['Precio Sintético'] - r['Precio Real']) / r['Precio Real'] * 100)
-            hit_class = "hit-high" if hit_rate >= 98 else ""
-            table_rows += f"<tr><td>{r['Fecha'].strftime('%d %b %Y')}</td><td>${r['Precio Real']:,.2f}</td><td>${r['Precio Sintético']:,.2f}</td><td class='{hit_class}'>{hit_rate:.2f}%</td></tr>"
+    err_p = (df_m["Precio Sintético"] - df_m["Precio Real"]) / df_m["Precio Real"]
+    mape = err_p.abs().mean() * 100
+    v_err = err_p.std() * 100
+    bias = err_p.mean() * 100
 
-        st.markdown(f"""
-        <div class="section-box">
-            <div class="section-title">Daily Model Audit (Rolling 90 Days)</div>
-            <div class="cards-container" style="gap:10px; margin-bottom:20px;">
-                <div class="mini-card">
-                    <div class="card-label">Model Accuracy <span class="tooltip-wrapper"><span class="tooltip-icon">ⓘ</span><span class="tooltip-text">100% minus MAPE. Higher is better.</span></span></div>
-                    <div class="mini-value">{100-mape:.1f}%</div>
+    audit_rows = df_real_history.tail(90).sort_values("Fecha", ascending=False)
+    table_rows = "".join([f"<tr><td>{r['Fecha'].strftime('%d %b %Y')}</td><td>${r['Precio Real']:,.2f}</td><td>${r['Precio Sintético']:,.2f}</td><td class='{'hit-high' if (100 - abs(r['Precio Sintético'] - r['Precio Real']) / r['Precio Real'] * 100) >= 98 else ''}'>{(100 - abs(r['Precio Sintético'] - r['Precio Real']) / r['Precio Real'] * 100):.2f}%</td></tr>" for _, r in audit_rows.iterrows()])
+
+    st.markdown(f"""
+    <div class="section-box">
+        <div class="section-title">Daily Model Audit (Rolling 90 Days)</div>
+        <div class="cards-container" style="gap:10px; margin-bottom:20px;">
+            <div class="mini-card">
+                <div class="card-label">
+                    Model Accuracy
+                    <span class="tooltip-wrapper">
+                        <span class="tooltip-icon">ⓘ</span>
+                        <span class="tooltip-text">Percentage of projection accuracy: 100% minus the Mean Absolute Percentage Error (MAPE). Higher is better.</span>
+                    </span>
                 </div>
-                <div class="mini-card">
-                    <div class="card-label">Model Signal (90d)</div>
-                    <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
-                        <div class="mini-value signal-{signal.lower()}">{signal}</div>
-                        <div class="signal-return" style="color:{signal_color};">{f'{expected_return_90d:+.1f}%' if signal != 'NA' else 'N/A'}</div>
-                    </div>
+                <div class="mini-value">{100-mape:.1f}%</div>
+            </div>
+            <div class="mini-card">
+                <div class="card-label">
+                    Model Signal (90d)
+                    <span class="tooltip-wrapper">
+                        <span class="tooltip-icon">ⓘ</span>
+                        <span class="tooltip-text">Trading signal based on 90-day price projection vs current price. BUY if expected return &gt; 5%, SELL if &lt; -5%, otherwise HOLD.</span>
+                    </span>
                 </div>
-                <div class="mini-card">
-                    <div class="card-label">Error Vol.</div>
-                    <div class="mini-value">{v_err:.2f}%</div>
-                </div>
-                <div class="mini-card">
-                    <div class="card-label">Model Bias</div>
-                    <div class="mini-value">{bias:+.2f}%</div>
+                <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <div class="mini-value signal-{signal.lower()}">{signal}</div>
+                    <div class="signal-return" style="color:{signal_color};">{f'{expected_return_90d:+.1f}%' if signal != 'NA' else 'N/A'}</div>
                 </div>
             </div>
-            <div class="table-scroll"><table class="audit-table"><thead><tr><th>Date</th><th>Market Close</th><th>Projection</th><th>Hit Rate</th></tr></thead><tbody>{table_rows}</tbody></table></div>
+            <div class="mini-card">
+                <div class="card-label">
+                    Error Vol.
+                    <span class="tooltip-wrapper">
+                        <span class="tooltip-icon">ⓘ</span>
+                        <span class="tooltip-text">Standard deviation of projection errors. Measures the volatility/consistency of model accuracy. Lower is better.</span>
+                    </span>
+                </div>
+                <div class="mini-value">{v_err:.2f}%</div>
+            </div>
+            <div class="mini-card">
+                <div class="card-label">
+                    Model Bias
+                    <span class="tooltip-wrapper">
+                        <span class="tooltip-icon">ⓘ</span>
+                        <span class="tooltip-text">Average percentage deviation of projections from actual prices. Positive means overestimation, negative means underestimation.</span>
+                    </span>
+                </div>
+                <div class="mini-value">{bias:+.2f}%</div>
+            </div>
         </div>
-        """, unsafe_allow_html=True)
+        <div class="table-scroll"><table class="audit-table"><thead><tr><th>Date</th><th>Market Close</th><th>Projection</th><th>Hit Rate</th></tr></thead><tbody>{table_rows}</tbody></table></div>
+    </div>
+    """, unsafe_allow_html=True)
 
-    # NEWS & METHODOLOGY
+    # 2. NEWS SECTION
     news = fetch_news()
-    news_html = "".join([f'<div style="border-bottom:1px solid #2a2e39; padding-bottom:12px; margin-bottom:12px;"><div style="color:#787b86; font-size:0.75rem;">{n["date"]}</div><div style="color:white; font-weight:600;">{n["title"]}</div><a href="{n["link"]}" style="color:#2962ff; font-size:0.8rem; text-decoration:none;" target="_blank">READ ARTICLE →</a></div>' for n in news])
+    news_html = "".join([f'<div style="border-bottom:1px solid #2a2e39; padding-bottom:12px; margin-bottom:12px;"><div style="color:#787b86; font-size:0.75rem; margin-bottom:4px;">{n["date"]}</div><div style="color:white; font-weight:600; font-size:0.95rem; line-height:1.4;">{n["title"]}</div><a href="{n["link"]}" style="color:#2962ff; font-size:0.8rem; text-decoration:none; font-weight:700;" target="_blank">READ ARTICLE →</a></div>' for n in news])
     
-    col1, col2 = st.columns(2)
-    with col1:
-        st.markdown(f'<div class="section-box"><div class="section-title">Latest Nasdaq Insights</div>{news_html if news else "No news available."}</div>', unsafe_allow_html=True)
-    with col2:
-        st.markdown("""
-        <div class="section-box">
-            <div class="section-title">Our Methodology</div>
-            <div style="color:#b2b5be; line-height:1.7; font-size:0.95rem;">
-                This projection uses a proprietary <b>Synthetic Price Model</b> that analyzes historical cycle patterns and technical momentum via Fibonacci-based pathways and SMA filters.
-            </div>
-            <div style="margin-top:20px; text-align:center; font-size:0.7rem; color:#787b86;">DISCLAIMER: INFORMATIONAL PURPOSES ONLY.</div>
-        </div>
-        """, unsafe_allow_html=True)
+    st.markdown(f"""
+    <div class="section-box">
+        <div class="section-title">Latest Nasdaq Insights & News</div>
+        {news_html if news else '<div style="color:#787b86;">No news available.</div>'}
+    </div>
+    """, unsafe_allow_html=True)
 
-# Loop de refresco para precio en vivo
-if market_is_open:
-    time.sleep(2)
-    st.rerun()
+    # 3. METHODOLOGY SECTION
+    st.markdown(f"""
+    <div class="section-box">
+        <div class="section-title">Our Methodology</div>
+        <div style="color:#b2b5be; line-height:1.7; font-size:0.95rem;">
+            This projection uses a proprietary <b>Synthetic Price Model</b> that analyzes historical cycle patterns and technical momentum. 
+            By integrating 200-day and 50-day SMA macro filters with Fibonacci-based price pathway algorithms, we generate daily estimates. 
+            All performance metrics are calculated on a rolling 90-day window to ensure maximum transparency and model calibration.
+        </div>
+        <div style="margin-top:20px; padding-top:20px; border-top:1px solid #2a2e39; text-align:center; font-size:0.7rem; color:#787b86; text-transform:uppercase; letter-spacing:1px;">
+            Disclaimer: This is for informational purposes only.
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
