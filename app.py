@@ -50,6 +50,9 @@ if market_is_open:
 
 st.session_state.last_market_open = market_is_open
 
+# ─────────────────────────────────────────────────────────────────────────────
+#  VARIABLES GLOBALES
+# ─────────────────────────────────────────────────────────────────────────────
 AVATAR_URL = "https://ugc.production.linktr.ee/2fb027da-4522-4b25-8855-39f77182ce8b_mQO6eyvY-400x400.png?io=true&size=avatar-v3_0"
 
 # ─────────────────────────────────────────────────────────────────────────────
