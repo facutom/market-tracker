@@ -21,6 +21,11 @@ st.set_page_config(
 )
 
 # ─────────────────────────────────────────────────────────────────────────────
+#  VARIABLES GLOBALES (DEFINIR ANTES DE USARLAS)
+# ─────────────────────────────────────────────────────────────────────────────
+AVATAR_URL = "https://ugc.production.linktr.ee/2fb027da-4522-4b25-8855-39f77182ce8b_mQO6eyvY-400x400.png?io=true&size=avatar-v3_0"
+
+# ─────────────────────────────────────────────────────────────────────────────
 #  CONTROL DE REFRESCO SELECTIVO
 # ─────────────────────────────────────────────────────────────────────────────
 ny_tz = pytz.timezone('America/New_York')
@@ -29,31 +34,22 @@ is_weekday = now_ny.weekday() < 5
 m_open, m_close = dt_time(9, 30), dt_time(16, 0)
 market_is_open = is_weekday and (m_open <= now_ny.time() <= m_close)
 
-# Control de estado para detectar cierre de mercado
 if 'last_market_open' not in st.session_state:
     st.session_state.last_market_open = market_is_open
 
-# Si acaba de cerrarse el mercado → forzar rerun para actualizar datos
 if st.session_state.last_market_open and not market_is_open:
     st.session_state.last_market_open = False
     st.rerun()
 
-# Si mercado abre → resetear flag y refrescar
 if not st.session_state.last_market_open and market_is_open:
     st.session_state.last_market_open = True
     st.rerun()
 
-# Si mercado abierto → refrescar cada 2 segundos (solo precio)
 if market_is_open:
     time.sleep(2)
     st.rerun()
 
 st.session_state.last_market_open = market_is_open
-
-# ─────────────────────────────────────────────────────────────────────────────
-#  VARIABLES GLOBALES
-# ─────────────────────────────────────────────────────────────────────────────
-AVATAR_URL = "https://ugc.production.linktr.ee/2fb027da-4522-4b25-8855-39f77182ce8b_mQO6eyvY-400x400.png?io=true&size=avatar-v3_0"
 
 # ─────────────────────────────────────────────────────────────────────────────
 #  CSS INTEGRADO
@@ -66,7 +62,6 @@ header {visibility: hidden !important;}
 [data-testid="stDecoration"] {display: none !important;}
 footer {visibility: hidden;}
 
-/* ELIMINAR ESTILOS POR DEFECTO DE ST MARKDOWN */
 [data-testid="stMarkdownContainer"] > p { margin-bottom: 0px !important; }
 [data-testid="stMarkdownContainer"] { padding: 0px !important; }
 
@@ -76,12 +71,10 @@ section.main > div { padding-top: 0rem !important; }
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
 
-/* HEADER */
 .header-centered { text-align: center; margin-bottom: 20px; }
 .main-title { font-size: 3.5rem; font-weight: 800; color: #ffffff !important; letter-spacing: -2px; line-height: 1.1; }
 .date-sub { font-size: 0.95rem; color: #787b86 !important; text-transform: uppercase; margin-top: 5px; }
 
-/* STATUS */
 .status-tag { display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 700; margin-top: 8px; }
 .dot-live { height: 10px; width: 10px; background-color: #00ff41; border-radius: 50%; animation: pulse-green 2s infinite; }
 .dot-closed { height: 10px; width: 10px; background-color: #f23645; border-radius: 50%; }
@@ -92,14 +85,12 @@ section.main > div { padding-top: 0rem !important; }
     100% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(0, 255, 65, 0); }
 }
 
-/* CARDS GENERALES */
 .cards-container { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; width: 100%; flex-wrap: wrap; }
 .card-item { background: #1e222d !important; border: 1px solid #2a2e39 !important; border-radius: 12px; padding: 20px 40px; text-align: center; min-width: 280px; }
 .card-label { color: #787b86 !important; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: 5px; }
 .card-value-green { color: #00ff41 !important; font-size: 2.5rem; font-weight: 800; line-height: 1; }
 .card-value-teal { color: #26a69a !important; font-size: 2.5rem; font-weight: 800; line-height: 1; }
 
-/* MINI CARDS (AUDIT) */
 .mini-card { background: #131722 !important; border: 1px solid #2a2e39 !important; border-radius: 8px; padding: 12px; text-align: center; flex: 1; min-width: 120px; }
 .mini-value { color: #26a69a !important; font-size: 1.6rem; font-weight: 800; }
 .mini-value.signal-buy { color: #00ff41 !important; }
@@ -108,12 +99,10 @@ section.main > div { padding-top: 0rem !important; }
 .mini-value.signal-na { color: #787b86 !important; }
 .signal-return { font-size: 1.2rem; font-weight: 700; margin-top: 0; }
 
-/* INDICATORS */
 .indicator-row { display: flex; justify-content: center; gap: 30px; margin: 0 auto 20px auto; font-size: 0.8rem; font-weight: 700; background: #1e222d !important; padding: 12px 25px; border-radius: 10px; border: 1px solid #2a2e39 !important; width: fit-content; }
 .ind-item { display: flex; align-items: center; gap: 8px; color: #ffffff !important; }
 .dot { width: 8px; height: 8px; border-radius: 50%; }
 
-/* TOOLTIP ICONS */
 .tooltip-wrapper {
     position: relative;
     display: inline-flex;
@@ -178,7 +167,6 @@ section.main > div { padding-top: 0rem !important; }
     }
 }
 
-/* UNIFICACIÓN DE SECCIONES */
 .section-box { 
     background: #1e222d !important; 
     border: 1px solid #2a2e39 !important; 
@@ -196,7 +184,6 @@ section.main > div { padding-top: 0rem !important; }
     line-height: 1;
 }
 
-/* TABLES */
 .table-scroll { max-height: 350px; overflow-y: auto; border-radius: 8px; border: 1px solid #2a2e39; background: #131722; margin-top: 10px; }
 .audit-table { width: 100%; border-collapse: collapse; color: #d1d4dc; font-size: 0.85rem; }
 .audit-table th { position: sticky; top: 0; background: #2a2e39; color: #787b86; padding: 12px; text-transform: uppercase; font-size: 0.7rem; z-index: 10; text-align: center; }
@@ -236,7 +223,9 @@ def load_data():
                 df[col] = pd.to_numeric(df[col].astype(str).str.replace(',', '.').str.replace(r'[^0-9.-]', '', regex=True), errors="coerce")
         df["Fecha"] = pd.to_datetime(df["Fecha"], dayfirst=True, errors="coerce")
         return df.dropna(subset=["Fecha"]).sort_values("Fecha").reset_index(drop=True)
-    except: return pd.DataFrame()
+    except Exception as e:
+        st.error(f"Error loading data: {e}")
+        return pd.DataFrame()
 
 def get_market_status():
     ny_tz = pytz.timezone('America/New_York')
@@ -251,7 +240,8 @@ def fetch_news():
     try:
         feed = feedparser.parse("https://news.google.com/rss/search?q=nasdaq+stock+market&hl=en-US&gl=US&ceid=US:en")
         return [{"title": e.title, "link": e.link, "date": e.published} for e in feed.entries[:3]]
-    except: return []
+    except:
+        return []
 
 def get_live_price():
     try:
@@ -260,7 +250,8 @@ def get_live_price():
         if len(hist) >= 2:
             return ticker.fast_info['last_price'], hist['Close'].iloc[-2]
         return ticker.fast_info['last_price'], None
-    except: return None, None
+    except:
+        return None, None
 
 # ─────────────────────────────────────────────────────────────────────────────
 #  EJECUCIÓN
@@ -271,7 +262,6 @@ live_price, yf_yesterday = get_live_price()
 if not df.empty:
     status_txt, dot_cls, s_color, today_date = get_market_status()
     
-    # Datos históricos: incluir hoy SOLO si mercado cerrado
     if market_is_open:
         df_real_history = df[(df["Precio Real"] > 0) & (df["Fecha"].dt.date < today_date)]
     else:
@@ -292,7 +282,6 @@ if not df.empty:
     df_future = df[df["Fecha"].dt.date >= target_date]
     one_year_target = df_future.iloc[0]["Precio Sintético"] if not df_future.empty else 0
 
-    # MODEL SIGNAL (90D) CALCULATION
     target_date_90d = today_date + timedelta(days=90)
     df_future_90d = df[df["Fecha"].dt.date >= target_date_90d]
     price_90d = df_future_90d.iloc[0]["Precio Sintético"] if not df_future_90d.empty else None
@@ -349,7 +338,7 @@ if not df.empty:
     fig.update_layout(template="plotly_dark", paper_bgcolor="#0b0e11", plot_bgcolor="#0b0e11", height=500, margin=dict(l=0, r=0, t=5, b=0), yaxis=dict(side="right", type="log"), legend=dict(orientation="h", yanchor="bottom", y=0.01, xanchor="right", x=0.99, bgcolor="rgba(11, 14, 17, 0.8)"))
     st.plotly_chart(fig, use_container_width=True, config={'displaylogo': False})
 
-    # 1. DAILY MODEL AUDIT SECTION
+    # DAILY MODEL AUDIT SECTION
     df_m = df_real_history.tail(90).copy()
     err_p = (df_m["Precio Sintético"] - df_m["Precio Real"]) / df_m["Precio Real"]
     mape = err_p.abs().mean() * 100
@@ -357,7 +346,7 @@ if not df.empty:
     bias = err_p.mean() * 100
 
     audit_rows = df_real_history.tail(90).sort_values("Fecha", ascending=False)
-    table_rows = "".join([f"<tr><td>{r['Fecha'].strftime('%d %b %Y')}</td><td>${r['Precio Real']:,.2f}</td><td>${r['Precio Sintético']:,.2f}</td><td class='{'hit-high' if (100 - abs(r['Precio Sintético'] - r['Precio Real']) / r['Precio Real'] * 100) >= 98 else ''}'>{(100 - abs(r['Precio Sintético'] - r['Precio Real']) / r['Precio Real'] * 100):.2f}%</td></tr>" for _, r in audit_rows.iterrows()])
+    table_rows = "".join([f"<tr><td>{r['Fecha'].strftime('%d %b %Y')}</td><td>${r['Precio Real']:,.2f}</td><td>${r['Precio Sintético']:,.2f}</td><td class='{'hit-high' if (100 - abs(r['Precio Sintético'] - r['Precio Real']) / r['Precio Real'] * 100) >= 98 else ''}'>{(100 - abs(r['Precio Sintético'] - r['Precio Real']) / r['Precio Real'] * 100):.2f}%</td><tr>" for _, r in audit_rows.iterrows()])
 
     st.markdown(f"""
     <div class="section-box">
@@ -411,7 +400,7 @@ if not df.empty:
     </div>
     """, unsafe_allow_html=True)
 
-    # 2. NEWS SECTION
+    # NEWS SECTION
     news = fetch_news()
     news_html = "".join([f'<div style="border-bottom:1px solid #2a2e39; padding-bottom:12px; margin-bottom:12px;"><div style="color:#787b86; font-size:0.75rem; margin-bottom:4px;">{n["date"]}</div><div style="color:white; font-weight:600; font-size:0.95rem; line-height:1.4;">{n["title"]}</div><a href="{n["link"]}" style="color:#2962ff; font-size:0.8rem; text-decoration:none; font-weight:700;" target="_blank">READ ARTICLE →</a></div>' for n in news])
     
@@ -422,7 +411,7 @@ if not df.empty:
     </div>
     """, unsafe_allow_html=True)
 
-    # 3. METHODOLOGY SECTION
+    # METHODOLOGY SECTION
     st.markdown(f"""
     <div class="section-box">
         <div class="section-title">Our Methodology</div>
@@ -436,3 +425,5 @@ if not df.empty:
         </div>
     </div>
     """, unsafe_allow_html=True)
+else:
+    st.error("No data available. Please check your Google Sheets connection.")
